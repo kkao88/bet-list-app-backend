@@ -1,6 +1,7 @@
 package com.example.bettor.event;
 
 import com.example.bettor.bettor.Bettor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -17,15 +18,23 @@ public class EventController {
 
     @GetMapping("/events")
     public List<Event> getAllEvents(@RequestParam(value="type", defaultValue="NFL") String type) {
-        return repository.findByTypeAndDateTimeGreaterThan(type, new Date());
+        return repository.findByTypeAndDateTimeGreaterThanOrderByDateTime(type, new Date());
+    }
+
+    @GetMapping("/event/{eventId}")
+    public Event getEventById(@PathVariable String eventId) {
+        return repository.findById(eventId).get();
     }
 
     @PutMapping("/event")
     public void addNewEvent(@RequestBody Event event) {
-        event.setHomeTeamBettors(new ArrayList<>());
-        event.setAwayTeamBettors(new ArrayList<>());
-        event.setOverBettors(new ArrayList<>());
-        event.setUnderBettors(new ArrayList<>());
+        if (StringUtils.isEmpty(event.getId())) {
+            event.setHomeTeamBettors(new ArrayList<>());
+            event.setAwayTeamBettors(new ArrayList<>());
+            event.setOverBettors(new ArrayList<>());
+            event.setUnderBettors(new ArrayList<>());
+        }
+
         repository.save(event);
     }
 
