@@ -1,5 +1,5 @@
 ---
 applications:
-- name: kevin_demo
+- name: game-list
   buildpack: java_buildpack
   path: target/bettor-0.0.1-SNAPSHOT.jar
