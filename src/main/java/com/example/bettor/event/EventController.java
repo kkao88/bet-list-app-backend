@@ -4,6 +4,9 @@ import com.example.bettor.bettor.Bettor;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -98,5 +101,34 @@ public class EventController {
     void deleteEvent(@PathVariable String eventId) {
         Event event = repository.findById(eventId).get();
         repository.delete(event);
+    }
+
+    @PostMapping("/massEntry/{eventType}")
+    public void massEntry(@PathVariable String eventType, @RequestBody String text, @RequestParam(value="date") String date) {
+        try {
+            int linesPerGame = 18;
+            String decodedText = java.net.URLDecoder.decode(text, "UTF-8");
+            String[] lines = decodedText.split("\r\n|\r|\n");
+            int numberOfGames = (lines.length - 1)/linesPerGame;
+            for (int i = 0; i < numberOfGames; i++){
+                Event event = new Event();
+                event.setAwayTeam(lines[i*linesPerGame + 1]);
+                event.setHomeTeam(lines[i*linesPerGame + 2]);
+                String dateString = date+" "+lines[i*linesPerGame + 3];
+                SimpleDateFormat dateFormat = new SimpleDateFormat("M d y h:mm a z");
+                event.setDateTime(dateFormat.parse(dateString));
+                String trimmedLine = StringUtils.trimWhitespace(lines[i*linesPerGame + 4]);
+                event.setLine(trimmedLine.substring(0, trimmedLine.length() - 4));
+                event.setTotal(lines[i*linesPerGame + 6]);
+                event.setType(eventType);
+                if (event.isValidEvent()){
+                    this.addNewEvent(event);
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

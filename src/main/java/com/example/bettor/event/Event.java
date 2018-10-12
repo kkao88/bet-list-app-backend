@@ -1,6 +1,7 @@
 package com.example.bettor.event;
 
 import org.springframework.data.annotation.Id;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +53,10 @@ public class Event {
     }
 
     public Event() {
+        this.homeTeamBettors = new ArrayList<String>();
+        this.awayTeamBettors = new ArrayList<String>();
+        this.overBettors = new ArrayList<String>();
+        this.underBettors = new ArrayList<String>();
     }
 
     public String getHomeTeam() {
@@ -187,5 +192,10 @@ public class Event {
                 ", homeTeamBettors=" + homeTeamBettors +
                 ", awayTeamBettors=" + awayTeamBettors +
                 '}';
+    }
+
+    public Boolean isValidEvent () {
+        return !StringUtils.isEmpty(this.homeTeam) &&
+                !StringUtils.isEmpty(this.awayTeam) && this.dateTime != null;
     }
 }
